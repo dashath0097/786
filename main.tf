@@ -9,13 +9,13 @@ terraform {
 
 provider "spacelift" {}
 
-# Assign AWS Account IDs from the Spacelift environment variable
-variable "aws_account_ids" {
-  default = jsondecode(get_env("AWS_ACCOUNT_IDS")) # Read the environment variable correctly
+# Read the AWS_ACCOUNT_IDS from environment variables
+locals {
+  aws_account_ids = jsondecode(get_env("AWS_ACCOUNT_IDS"))
 }
 
 resource "spacelift_aws_integration" "developer_aws" {
-  for_each = toset(var.aws_account_ids)  # Loop through each AWS account
+  for_each = toset(local.aws_account_ids)  # Loop through each AWS account
 
   name     = "AWS-${each.value}"
   role_arn = "arn:aws:iam::${each.value}:role/Spacelift"
@@ -23,5 +23,5 @@ resource "spacelift_aws_integration" "developer_aws" {
 }
 
 output "integration_ids" {
-  value = { for acc_id in var.aws_account_ids : acc_id => spacelift_aws_integration.developer_aws[acc_id].id }
+  value = { for acc_id in local.aws_account_ids : acc_id => spacelift_aws_integration.developer_aws[acc_id].id }
 }

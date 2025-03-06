@@ -9,6 +9,11 @@ terraform {
 
 provider "spacelift" {}
 
+# Assign AWS Account IDs from the Spacelift environment variable
+variable "aws_account_ids" {
+  default = jsondecode(get_env("AWS_ACCOUNT_IDS")) # Read the environment variable correctly
+}
+
 resource "spacelift_aws_integration" "developer_aws" {
   for_each = toset(var.aws_account_ids)  # Loop through each AWS account
 
